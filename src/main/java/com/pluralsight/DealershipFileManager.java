@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class DealershipFileManager {
 
-    public static Dealership getDealership() {
+    public Dealership getDealership() {
         String fileName = "src/main/resources/inventory.csv";
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
@@ -40,7 +40,8 @@ public class DealershipFileManager {
 
             bufferedReader.close();
             return dealership;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
 
