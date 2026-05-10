@@ -1,15 +1,14 @@
 package com.pluralsight;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 
 public class DealershipFileManager {
+    private final String INVENTORY_LIST = "src/main/resources/inventory.csv";
 
     public Dealership getDealership() {
-        String fileName = "src/main/resources/inventory.csv";
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(INVENTORY_LIST));
             String line = bufferedReader.readLine();
             line = line.trim();
             String[] splitLine = line.split("\\|");
@@ -40,15 +39,31 @@ public class DealershipFileManager {
 
             bufferedReader.close();
             return dealership;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public void saveDealership() {
+    public void saveDealership(Vehicle v) {
         //TODO make a buffered writer
+        File file = new File(INVENTORY_LIST);
+
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(INVENTORY_LIST, true));
+
+            if (file.length() > 0) {
+                bufferedWriter.newLine();
+            }
+
+            bufferedWriter.write(v.toFileString());
+
+            bufferedWriter.close();
+
+        } catch (IOException e) {
+            System.err.println("I/O error. Try Again");
+        }
+
     }
 
 

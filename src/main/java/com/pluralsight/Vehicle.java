@@ -88,5 +88,8 @@ public class Vehicle {
     }
     //endregion
 
+    public String toFileString() {
+        return this.vin + "|" + this.year + "|" + this.make + "|" + this.model + "|" + this.vehicleType + "|" + this.color + "|" + this.odometer + "|" + this.price;
+    }
 
 }

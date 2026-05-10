@@ -372,7 +372,35 @@ public class UserInterface {
     }
 
     public void processAddVehicleRequest() {
-        //Dealership.saveDealership()
+        DealershipFileManager dealershipFileManager = new DealershipFileManager();
+        System.out.println("Please enter the VIN number: ");
+        int vin = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Please enter the year of the vehicle: ");
+        int year = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Please enter the make of the vehicle: ");
+        String make = scanner.nextLine();
+
+        System.out.println("Please enter the model of the vehicle: ");
+        String model = scanner.nextLine();
+
+        System.out.println("Please enter the vehicle type: ");
+        String vehicleType = scanner.nextLine();
+
+        System.out.println("Please enter the color of the vehicle: ");
+        String color = scanner.nextLine();
+
+        System.out.println("Please enter the mileage of the vehicle: ");
+        int odometer = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Please enter the price of the vehicle: ");
+        double price = Double.parseDouble(scanner.nextLine());
+
+        Vehicle v = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
+
+        dealershipFileManager.saveDealership(v);
+
     }
 
     public void processRemoveVehicleRequest() {
