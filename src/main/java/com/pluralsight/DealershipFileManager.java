@@ -26,10 +26,10 @@ public class DealershipFileManager {
 
                 int vin = Integer.parseInt(split[0]);
                 int year = Integer.parseInt(split[1]);
-                String make = split[3];
-                String model = split[4];
-                String vehicleType = split[5];
-                String color = split[6];
+                String make = split[2];
+                String model = split[3];
+                String vehicleType = split[4];
+                String color = split[5];
                 int odometer = Integer.parseInt(split[6]);
                 double price = Double.parseDouble(split[7]);
 
@@ -45,6 +45,10 @@ public class DealershipFileManager {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void saveDealership() {
+        //TODO make a buffered writer
     }
 
 
