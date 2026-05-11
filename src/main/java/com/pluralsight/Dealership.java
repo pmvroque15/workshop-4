@@ -1,6 +1,7 @@
 package com.pluralsight;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Dealership {
     private String name;
@@ -55,10 +56,10 @@ public class Dealership {
     }
 
     public void addVehicle(Vehicle vehicle) {
-        inventory.add(vehicle);
+       inventory.add(vehicle);
     }
 
-    public void removeVehicle() {
-
+    public void removeVehicle(Vehicle vehicle) {
+        inventory.remove(vehicle);
     }
 }

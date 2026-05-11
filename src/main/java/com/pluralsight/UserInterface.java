@@ -372,7 +372,9 @@ public class UserInterface {
     }
 
     public void processAddVehicleRequest() {
+        Scanner scanner = new Scanner(System.in);
         DealershipFileManager dealershipFileManager = new DealershipFileManager();
+
         System.out.println("Please enter the VIN number: ");
         int vin = Integer.parseInt(scanner.nextLine());
 
@@ -400,10 +402,17 @@ public class UserInterface {
         Vehicle v = new Vehicle(vin, year, make, model, vehicleType, color, odometer, price);
 
         dealershipFileManager.saveDealership(v);
-
     }
 
     public void processRemoveVehicleRequest() {
+
+        System.out.println("Enter the VIN number you wish to remove: ");
+        int vin = Integer.parseInt(scanner.nextLine());
+
+        DealershipFileManager fileManager = new DealershipFileManager();
+        fileManager.removerVehicleByVin(vin);
+
+        System.out.println("If the VIN existed, it has been removed from file.");
 
     }
 

@@ -46,13 +46,13 @@ public class DealershipFileManager {
     }
 
     public void saveDealership(Vehicle v) {
-        //TODO make a buffered writer
+
         File file = new File(INVENTORY_LIST);
 
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(INVENTORY_LIST, true));
 
-            if (file.length() > 0) {
+            if (file.exists() && file.length() > 0) {
                 bufferedWriter.newLine();
             }
 
@@ -66,5 +66,40 @@ public class DealershipFileManager {
 
     }
 
+    public void removerVehicleByVin(int vin) {
+        File inputFile = new File(INVENTORY_LIST);
+        File temporaryFile = new File("src/main/resources/inventory_temporary.csv");
+
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(temporaryFile));
+
+
+            String line = "";
+
+            bufferedReader.readLine();
+            while ((line = bufferedReader.readLine()) != null) {
+
+                String[] parts = line.split("\\|");
+
+                int vinNumber = Integer.parseInt(parts[0]);
+
+                if (vinNumber != vin) {
+                    bufferedWriter.write(line);
+                    bufferedWriter.newLine();
+                }
+
+            }
+
+            bufferedReader.close();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            System.err.println("Error processing file: " + e.getMessage());
+
+        }
+            inputFile.delete();
+            temporaryFile.renameTo(inputFile);
+
+    }
 
 }
