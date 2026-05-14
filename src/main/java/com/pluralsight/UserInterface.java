@@ -1,4 +1,6 @@
 package com.pluralsight;
+
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -6,21 +8,18 @@ import java.util.Scanner;
 public class UserInterface {
     Scanner scanner = new Scanner(System.in);
     private Dealership dealership;
-    ArrayList<Vehicle> vehicles;
 
     public UserInterface() {
         init();
-        vehicles = dealership.getAllVehicles();
     }
 
     private void init() {
         //Creating an instance of DealershipFileManagerClass
-        DealershipFileManager dealershipFileManager = new DealershipFileManager();
 
         //Getting the values needed from dealershipFileManager by using its getters
         //and assigning it to variable to pass in the dealership's constructor arguments
 
-        this.dealership = dealershipFileManager.getDealership();
+        this.dealership = DealershipFileManager.getDealership();
     }
 
     public void display() {
@@ -40,6 +39,7 @@ public class UserInterface {
                                                         Press 7 to list all vehicles
                                                         Press 8 to add a vehicle
                                                         Press 9 to remove a vehicle
+                                                        Type "S" to sell a vehicle or "L" to lease a vehicle
                                                         Press 99 to quit%n
                 """;
 
@@ -54,29 +54,33 @@ public class UserInterface {
                 System.out.printf(menu, dealership.getName(), dealership.getAddress(), dealership.getPhone());
                 System.out.println();
                 System.out.print("                                          What brings you in today: ");
-                int number = Integer.parseInt(scanner.nextLine());
-                switch (number) {
-                    case 1 -> processGetByPriceRequest();
+                String choice = String.format(scanner.nextLine());
+                switch (choice) {
+                    case "1" -> processGetByPriceRequest();
 
-                    case 2 -> processGetByMakeModelRequest();
+                    case "2" -> processGetByMakeModelRequest();
 
-                    case 3 -> processGetByYearRequest();
+                    case "3" -> processGetByYearRequest();
 
-                    case 4 -> processGetByColorRequest();
+                    case "4" -> processGetByColorRequest();
 
-                    case 5 -> processGetByMileageRequest();
+                    case "5" -> processGetByMileageRequest();
 
-                    case 6 -> processGetByVehicleTypeRequest();
+                    case "6" -> processGetByVehicleTypeRequest();
 
-                    case 7 -> processAllVehiclesRequest();
+                    case "7" -> processAllVehiclesRequest();
 
-                    case 8 -> processAddVehicleRequest();
+                    case "8" -> processAddVehicleRequest();
 
-                    case 9 -> processRemoveVehicleRequest();
+                    case "9" -> processRemoveVehicleRequest();
 
-                    case 99 -> exit = true;
+                    case "99" -> exit = true;
 
-                    default -> System.err.println("Unexpected value: " + number);
+                    case "S" -> System.out.println("Sell");
+
+                    case "L" -> System.out.println("Lease");
+
+                    default -> System.err.println("Unexpected value: " + choice);
 
                 }
             } catch (NumberFormatException e) {
@@ -86,284 +90,170 @@ public class UserInterface {
     }
 
     public void processGetByPriceRequest() {
-        double minimumPrice = Double.MAX_VALUE;
-        double maximumPrice = 0;
+        try {
+            System.out.println("Minimum Price: ");
+            double minimumPriceInput = Double.parseDouble(scanner.nextLine());
 
-        for (Vehicle v : vehicles) {
-            double currentPrice = v.getPrice();
-            //checking the lowest price in the arraylist of vehicles, then compare: if the input price is lower than the minimum price in the list, then throw an error.
-            if (currentPrice < minimumPrice) {
-                minimumPrice = currentPrice;
+            System.out.println("Maximum Price: ");
+            double maximumPriceInput = Double.parseDouble(scanner.nextLine());
+
+            if (minimumPriceInput < 0 || maximumPriceInput < 0) {
+                System.err.println("Price cannot be negative. Try again.");
             }
 
-            //Vice versa, checking the input if the user entered an amount that is greater than the maximum price in the list, then throw an error
-            if (currentPrice > maximumPrice) {
-                maximumPrice = currentPrice;
+            ArrayList<Vehicle> matchPrice = dealership.getVehiclesByPrice(minimumPriceInput, maximumPriceInput);
+
+            if (matchPrice.isEmpty()) {
+                System.err.println("No vehicles available within the price range.");
+                return;
             }
+            displayVehicles(matchPrice);
+        } catch (NumberFormatException e) {
+            System.err.println("Please enter a valid number.");
         }
 
         boolean running = false;
         do {
 
-            try {
+            System.out.println("                   Do you want to search for another car or go back to the menu? Type \"search\" to search another car or press X to go back.");
+            String input = scanner.nextLine();
 
-                System.out.println("Minimum Price: ");
-                double minimumPriceInput = Double.parseDouble(scanner.nextLine());
-
-                System.out.println("Maximum Price: ");
-                double maximumPriceInput = Double.parseDouble(scanner.nextLine());
-
-                if (minimumPriceInput < 0 || maximumPriceInput < 0) {
-
-                    System.err.println("Price cannot be negative. Try again.");
-
-                } else if (minimumPriceInput < minimumPrice || maximumPriceInput > maximumPrice) {
-                    System.err.println("There are no available cars in this price range.");
-                    System.err.printf("Valid range: $%.2f - $%.2f try again.%n", minimumPrice, maximumPrice);
-                } else {
-                    running = true;
-                }
-
-                System.out.println("Here's an available vehicle for you: ");
-                printHeader();
-
-                for (Vehicle v : vehicles) {
-                    if (minimumPriceInput >= v.getPrice() && maximumPriceInput <= v.getPrice()) {
-                        printVehicleFormat(v);
-                    }
-                }
-
-                System.out.println("                   Do you want to search for another car or go back to the menu? Press V to search another car or press X to go back.");
-                String input = scanner.nextLine();
-
-                running = !input.equalsIgnoreCase("v");
-            } catch (NumberFormatException e) {
-                System.err.println("Please enter a valid number.");
-            }
+            running = !input.equalsIgnoreCase("search");
 
         } while (!running);
+//        else if (minimumPriceInput < minimumPrice || max > maximumPrice) {
+//            System.err.println("There are no available cars in this price range.");
+//            System.err.printf("Valid range: $%.2f - $%.2f try again.%n", minimumPrice, maximumPrice);
+//        } else {
+//            running = true;
+//        }
     }
 
     //todo: Try to make prompt if they want to search make or model or both
     public void processGetByMakeModelRequest() {
-        boolean running = true;
+        ArrayList<Vehicle> vehicles = dealership.getAllVehicles();
 
-        do {
-            System.out.println("                  What specific make you're looking for? type the make of the vehicle otherwise press enter to skip");
-            String make = scanner.nextLine();
+        System.out.println("                  What specific make you're looking for? type the make of the vehicle otherwise press enter to skip");
+        String make = scanner.nextLine();
 
-            System.out.println("                  Do you have a particular model in mind? If yes, type the model otherwise press enter to skip.");
-            String model = scanner.nextLine();
+        System.out.println("                  Do you have a particular model in mind? If yes, type the model otherwise press enter to skip.");
+        String model = scanner.nextLine();
 
-            if (make.matches("[a-zA-Z0-9]+") || model.matches("[a-zA-Z0-9]+")) {
-                System.err.println("Please enter a valid input. Try again.");
-            }
+//        if (make.matches("[a-zA-Z0-9]+") || model.matches("[a-zA-Z0-9]+")) {
+//            System.err.println("Please enter a valid input. Try again.");
+//        }
 
-            if (make.isEmpty() && model.isEmpty()) {
-                System.out.println("Undecided? Here are the available vehicles: ");
-                for (Vehicle v : vehicles) {
-                    printVehicleFormat(v);
-                }
-                running = false;
-            }
+        ArrayList<Vehicle> matchMakeModel = dealership.getVehiclesByMakeModel(make, model);
+        if (matchMakeModel.isEmpty()) {
+            System.out.println("Undecided? Here are the available vehicles: ");
+            printHeader();
 
             for (Vehicle v : vehicles) {
-
-                boolean makeMatches = make.trim().equalsIgnoreCase(v.getMake());
-                boolean modelMatches = model.trim().equalsIgnoreCase(v.getModel());
-
-                if (makeMatches && modelMatches) {
-                    //todo ask David how to filter this
-                    printVehicleFormat(v);
-                    running = false;
-                    break;
-                } else if (make.isEmpty() && modelMatches) {
-
-                    printVehicleFormat(v);
-                    running = false;
-                    break;
-
-                } else if (makeMatches && model.isEmpty()) {
-
-                    printVehicleFormat(v);
-                    running = false;
-                    break;
-                }
+                printVehicleFormat(v);
             }
-        } while (running);
+        }
+        displayVehicles(matchMakeModel);
     }
 
     public void processGetByYearRequest() {
-        int minimumYear = vehicles.get(0).getYear();
-        int maximumYear = vehicles.get(0).getYear();
 
-        for (Vehicle v : vehicles) {
+        try {
+            System.out.println("Minimum Year: ");
+            int minimumYearInput = Integer.parseInt(scanner.nextLine());
 
-            if (v.getYear() < minimumYear) {
-                minimumYear = v.getYear();
+            System.out.println("Maximum Year: ");
+            int maximumYearInput = Integer.parseInt(scanner.nextLine());
 
+            ArrayList<Vehicle> matchYear = dealership.getVehiclesByYear(minimumYearInput, maximumYearInput);
+
+            if (matchYear.isEmpty()) {
+                System.err.println("No vehicles available in the years given. Try again.");
+                return;
             }
+            displayVehicles(matchYear);
 
-            if (v.getYear() > maximumYear) {
-                maximumYear = v.getYear();
-
-            }
-
+        } catch (NumberFormatException e) {
+            System.err.println("Enter a valid year. Try again.");
         }
-
-        boolean running = true;
-
-        do {
-            try {
-                System.out.println("Minimum Year: ");
-                int minimumYearInput = Integer.parseInt(scanner.nextLine());
-
-                System.out.println("Maximum Year: ");
-                int maximumYearInput = Integer.parseInt(scanner.nextLine());
-
-                if ((minimumYearInput < minimumYear) || (maximumYearInput > maximumYear)) {
-
-                    System.err.printf("Vehicle years available is from %s to %s. Try Again%n", minimumYear, maximumYear);
-
-                } else if (minimumYearInput > maximumYearInput) {
-                    System.err.println("Minimum year cannot be greater than maximum year. Try again.");
-                } else {
-
-                    for (Vehicle v : vehicles) {
-
-                        if (v.getYear() >= minimumYearInput && v.getYear() <= maximumYearInput) {
-                            printVehicleFormat(v);
-                        }
-
-                    }
-
-                    running = false;
-
-                }
-            } catch (NumberFormatException e) {
-                System.err.println("Enter a valid year. Try again.");
-            }
-        } while (running);
-
-
     }
 
     public void processGetByColorRequest() {
 
+        System.out.println("What color of a vehicle you're looking for? ");
+        String colorInput = scanner.nextLine();
 
-        boolean running = true;
-        do {
+        if (!colorInput.matches("[a-zA-Z\\s]+")) {
+            System.err.println("Please enter a valid input. Try again.");
+        }
 
-            System.out.println("What color of a vehicle you're looking for? ");
-            String colorInput = scanner.nextLine();
+        ArrayList<Vehicle> matches = dealership.getVehiclesByColor(colorInput);
 
-            if (!colorInput.matches("[a-zA-Z\\s]+")) {
-                System.err.println("Please enter a valid input. Try again.");
-                continue;
-            }
+        if (matches.isEmpty()) {
+            System.err.printf("No %s color available on the vehicle list. Try again%n", colorInput);
+            return;
+        }
 
-            boolean found = false;
-            for (Vehicle v : vehicles) {
-                if (colorInput.equalsIgnoreCase(v.getColor())) {
-                    printVehicleFormat(v);
-                    found = true;
-                }
-            }
+        displayVehicles(matches);
 
-            if (found) {
-                running = false;
-            }
-            if (!found) {
-                System.err.printf("No %s color available on the vehicle list. Try again%n", colorInput);
-            }
-
-        } while (running);
     }
 
     public void processGetByMileageRequest() {
+//        double minimumMileage = 0;
+//        double maximumMileage = 0;
+        try {
+            System.out.println("Minimum Mileage: ");
+            int minimumMileageInput = Integer.parseInt(scanner.nextLine());
 
+            if (minimumMileageInput < 0) {
+                System.err.println("Mileage cannot be negative. Try Again.");
 
-        boolean running = true;
-        do {
-
-            double minimumMileage = Double.MAX_VALUE;
-            double maximumMileage = 0;
-
-            for (Vehicle v : vehicles) {
-                double currentMileage = v.getOdometer();
-                //checking the lowest price in the arraylist of vehicles, then compare: if the input price is lower than the minimum price in the list, then throw an error.
-                if (currentMileage < minimumMileage) {
-                    minimumMileage = currentMileage;
-                }
-
-                //Vice versa, checking the input if the user entered an amount that is greater than the maximum price in the list, then throw an error
-                if (currentMileage > maximumMileage) {
-                    maximumMileage = currentMileage;
-                }
             }
 
+//                if (minimumMileageInput < minimumMileage) {
+//                    System.err.printf("Minimum mileage of a vehicle available is %s Try again.%n", minimumMileage);
+//
+//                }
 
-            try {
+            System.out.println("Maximum Mileage: ");
+            int maximumMileageInput = Integer.parseInt(scanner.nextLine());
 
-                System.out.println("Minimum Mileage: ");
-                int minimumMileageInput = Integer.parseInt(scanner.nextLine());
+            if (maximumMileageInput < 0) {
+                System.err.println("Mileage cannot be negative. Try Again.");
 
-                if (minimumMileageInput < 0) {
-                    System.err.println("Mileage cannot be negative. Try Again.");
-                    continue;
-                }
-
-                if (minimumMileageInput < minimumMileage) {
-                    System.err.printf("Minimum mileage of a vehicle available is %s Try again.%n", minimumMileage);
-                    continue;
-                }
-
-                System.out.println("Maximum Mileage: ");
-                int maximumMileageInput = Integer.parseInt(scanner.nextLine());
-
-                if (maximumMileageInput < 0) {
-                    System.err.println("Mileage cannot be negative. Try Again.");
-                    continue;
-                }
-                if (maximumMileageInput > maximumMileage) {
-                    System.err.printf("Maximum mileage of a vehicle available is %s Try again.%n", maximumMileage);
-                    continue;
-                }
-
-                if ( minimumMileageInput > maximumMileageInput) {
-                    System.err.println("Maximum mileage cannot be less than minimum mileage. Try Again.");
-                    continue;
-                }
-
-                boolean found = false;
-
-                for (Vehicle v : vehicles) {
-
-                    if (v.getOdometer() >= minimumMileageInput && v.getOdometer() <= maximumMileageInput) {
-
-                        printVehicleFormat(v);
-                        found = true;
-                    }
-
-                }
-
-                if (!found) {
-                    System.err.println("No vehicles found in that mileage range.");
-                }
-
-                running = false;
-
-            } catch (NumberFormatException e) {
-                System.err.println("Enter a valid number. Try again.");
             }
 
-        } while (running);
+//                if (maximumMileageInput > maximumMileage) {
+//                    System.err.printf("Maximum mileage of a vehicle available is %s Try again.%n", maximumMileage);
+//
+//                }
 
+//                if ( minimumMileageInput > maximumMileageInput) {
+//                    System.err.println("Maximum mileage cannot be less than minimum mileage. Try Again.");
+//                }
+            ArrayList<Vehicle> matchMileageRange = dealership.getVehiclesByMileage(minimumMileageInput, maximumMileageInput);
 
+            if (matchMileageRange.isEmpty()) {
+                System.err.println("No vehicles found in that mileage range.");
+                return;
+            }
+            displayVehicles(matchMileageRange);
+        } catch (NumberFormatException e) {
+            System.err.println("Enter a valid number. Try again.");
+        }
     }
 
     public void processGetByVehicleTypeRequest() {
-        System.out.println();
+        System.out.println("What vehicle type you are looking for: ");
+        String vehicleType = scanner.nextLine();
+
+        ArrayList<Vehicle> matchVehicleType = dealership.getVehiclesByType(vehicleType);
+
+        if (matchVehicleType.isEmpty()) {
+            System.err.printf("No vehicle available for %s", vehicleType);
+            return;
+        }
+
+        displayVehicles(matchVehicleType);
     }
 
     public void processAllVehiclesRequest() {

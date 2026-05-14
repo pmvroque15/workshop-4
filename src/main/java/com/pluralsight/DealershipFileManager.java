@@ -4,13 +4,13 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class DealershipFileManager {
-    private final String INVENTORY_LIST = "src/main/resources/inventory.csv";
+    private final static String INVENTORY_LIST = "src/main/resources/inventory.csv";
 
-    public Dealership getDealership() {
+    public static Dealership getDealership() {
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(INVENTORY_LIST));
             String line = bufferedReader.readLine();
-            line = line.trim();
+//            line = line.trim();
             String[] splitLine = line.split("\\|");
 
             String name = splitLine[0];
@@ -18,6 +18,7 @@ public class DealershipFileManager {
             String phoneNumber = splitLine[2];
 
             Dealership dealership = new Dealership(name, address, phoneNumber);
+
 
             while ((line = bufferedReader.readLine()) != null) {
                 String[] split = line.split("\\|");

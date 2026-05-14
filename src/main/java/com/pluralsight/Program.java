@@ -6,9 +6,9 @@ public class Program {
         UserInterface ui = new UserInterface();
 
         //TODO: Make sure all the methods are working
-//        ui.display();
-//        ui.exit();
-        ui.processRemoveVehicleRequest();
+        ui.display();
+        ui.exit();
+
 
     }
 
